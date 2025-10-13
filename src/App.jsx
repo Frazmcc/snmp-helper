@@ -4,7 +4,8 @@ import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import ExcelJS from 'exceljs'
 
-const SNMP_EXPORTERS = ['exporter_cms','exporter_acm','exporter_aes','exporter_gateway','exporter_aaep']
+const SNMP_EXPORTERS = ['exporter_cms','exporter_acm','exporter_aes','exporter_gateway','exporter_aaep','exporter_avayasbc',
+  'exporter_audiocodesbc']
 
 function normalizeVersion(v) {
   if (!v) return ''
