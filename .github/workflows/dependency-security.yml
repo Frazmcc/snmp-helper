@@ -1,0 +1,42 @@
+name: Node dependency security and build checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-fund
+      - name: Build
+        run: npm run build
+      - name: Check ExcelJS runtime workbook export after UUID override
+        run: |
+          node - <<'NODE'
+          const ExcelJS = require('exceljs')
+          ;(async () => {
+            const workbook = new ExcelJS.Workbook()
+            workbook.addWorksheet('Smoke test').addRow(['validated', 1])
+            const buffer = await workbook.xlsx.writeBuffer()
+            if (buffer.length < 100) throw new Error('ExcelJS produced an invalid spreadsheet')
+            const loaded = new ExcelJS.Workbook()
+            await loaded.xlsx.load(buffer)
+            if (loaded.getWorksheet('Smoke test').getCell('A1').value !== 'validated') {
+              throw new Error('ExcelJS round-trip did not preserve data')
+            }
+          })().catch(error => { console.error(error); process.exitCode = 1 })
+          NODE
+      - name: Run available tests
+        run: npm test --if-present
+      - name: Enforce zero known npm advisories
+        run: npm audit --audit-level=low

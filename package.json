@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=24.22.1 <25"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
@@ -20,7 +20,12 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.2",
-    "vite": "^5.4.8"
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.5"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "14.0.0"
+    }
   }
 }
