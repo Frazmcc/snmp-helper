@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import YAML from 'js-yaml'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import ExcelJS from 'exceljs'
+import { createSummaryXlsx } from './xlsx-export.js'
 
 const SNMP_EXPORTERS = ['exporter_cms','exporter_acm','exporter_aes','exporter_gateway','exporter_aaep','exporter_avayasbc',
   'exporter_audiocodesbc']
@@ -184,31 +184,8 @@ export default function App() {
     const zip = new JSZip();
     const root = zip.folder('excel_exports');
     for (const sum of fileSummaries) {
-      const wb = new ExcelJS.Workbook();
-      const ws = wb.addWorksheet('SNMP Summary', {properties:{defaultRowHeight:14}});
       const rows = sum.rows.map(r => r.map(c => cleanCell(c)));
-      rows.forEach((r) => {
-        const row = ws.addRow(r);
-        row.height = 14;
-        row.alignment = { vertical: 'middle', wrapText: false };
-        if (r.length >= 3) {
-          const v = String(r[2]).toLowerCase();
-          const cell = row.getCell(3);
-          if (v === '3' || v === 'v3' || v === 'snmpv3') {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34EBC0' } };
-          } else if (v === '2c' || v === '2') {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBA134' } };
-          }
-        }
-      });
-      ws.eachRow((row) => {
-        row.eachCell((cell) => {
-          cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
-        });
-      });
-      const widths = [36, 18, 10, 16, 22, 54];
-      widths.forEach((w,i)=> ws.getColumn(i+1).width = w);
-      const buffer = await wb.xlsx.writeBuffer();
+      const buffer = await createSummaryXlsx(rows);
       let customer = '';
       try {
         const first = rows?.[0]?.[0] || '';
@@ -237,31 +214,8 @@ export default function App() {
   }
 
   const downloadOneXLSX = async (sum) => {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('SNMP Summary', {properties:{defaultRowHeight:14}});
     const rows = sum.rows.map(r => r.map(c => cleanCell(c)));
-    rows.forEach((r) => {
-      const row = ws.addRow(r);
-      row.height = 14;
-      row.alignment = { vertical: 'middle', wrapText: false };
-      if (r.length >= 3) {
-        const v = String(r[2]).toLowerCase();
-        const cell = row.getCell(3);
-        if (v === '3' || v === 'v3' || v === 'snmpv3') {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34EBC0' } };
-        } else if (v === '2c' || v === '2') {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBA134' } };
-        }
-      }
-    });
-    ws.eachRow((row) => {
-      row.eachCell((cell) => {
-        cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
-      });
-    });
-    const widths = [36, 18, 10, 16, 22, 54];
-    widths.forEach((w,i)=> ws.getColumn(i+1).width = w);
-    const buffer = await wb.xlsx.writeBuffer();
+    const buffer = await createSummaryXlsx(rows);
     let customer = '';
     try {
       const first = rows?.[0]?.[0] || '';

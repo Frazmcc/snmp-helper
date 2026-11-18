@@ -9,3 +9,5 @@ Client-only EYAML → CSV/XLSX generator for SNMP exporters.
 Run
 npm install
 npm run dev
+
+Excel downloads use a small write-only Open XML exporter with inline text cells. The app does not load spreadsheets, evaluate formulas, or include ExcelJS.
